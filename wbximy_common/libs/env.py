@@ -150,7 +150,3 @@ def get_stack_info():
     s = ''.join(traceback.format_stack()[:-1] + traceback.format_exception(*sys.exc_info())[1:])
     # s = s.replace('\n', '').replace('\r', ' ')
     return s
-
-
-if __name__ == '__main__':
-    print(get_env())

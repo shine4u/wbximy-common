@@ -34,9 +34,3 @@ def zip_by_key(lst0: List, lst1: List, key_func=None):
             yield v[0][0], v[1][0]
         else:
             yield v[1][0], v[0][0]
-
-
-if __name__ == '__main__':
-    a = [(3, 1), (2, 5)]
-    b = [(2, 1), (1, 0)]
-    print(f'{list(zip_by_key(a, b))}')

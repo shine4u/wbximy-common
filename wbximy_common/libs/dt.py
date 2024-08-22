@@ -75,12 +75,3 @@ def to_datetime(o) -> Optional[datetime]:
 
 def cur_ts_sec() -> int:
     return int(time.time())
-
-
-if __name__ == '__main__':
-    print(to_datetime('2022/11/01'))
-    print(to_datetime('2022-01-09 14:56:57'))
-    print(to_datetime('2022-11-09 14:56:57.475a718'))
-    print(to_datetime(1667975961))
-    print(to_datetime(1667975961001))
-    print(to_date('2018年08月24日'))
