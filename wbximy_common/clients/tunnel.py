@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Tuple
 from threading import Lock
 from sshtunnel import SSHTunnelForwarder
-from wbximy_common.libs.env import get_env_prop, detect_tunnel, get_proj_dir
+from wbximy_common.libs.env import get_env_prop, get_env, get_proj_dir
 
 logger = logging.getLogger(__name__)
 
@@ -39,11 +39,11 @@ class TunnelMixin(object):
     def _use_tunnel(self, ) -> bool:
         if self.host is None or self.port is None:
             return False
-        if self.host in ['localhost', '127.0.0.1']:
+        if self.host in ['localhost', '127.0.0.1', '82.156.19.64']:
             return False
         if self.tunnel is not None:
             return self.tunnel
-        return detect_tunnel()
+        return get_env() == 'env_tyc_office'
 
     # def __del__(self):
     #    if self._tunnel_server:

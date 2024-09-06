@@ -9,6 +9,7 @@ import yaml
 from functools import lru_cache
 from typing import Optional, List
 
+
 # 获取当前设备的网卡IP，这里假设机器只有一个IP
 # https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
 @lru_cache(None)
@@ -25,7 +26,7 @@ def get_my_ip() -> Optional[str]:
             continue
         if ip != '127.0.0.1':
             break
-    print('get_my_ip -> ', ip)
+    print(f'get_ip: {ip}')
     return ip
 
 
@@ -55,13 +56,9 @@ def get_env() -> Optional[str]:
         item = yaml.safe_load(f)
         for pat, env in item.get('env', {}).items():
             if re.fullmatch(pat, my_ip):
+                print(f'get_env: {env}')
                 return env
     return None
-
-
-@lru_cache(None)
-def detect_tunnel():
-    return get_env() == 'env_tyc_office'
 
 
 # 获取配置值 根据ip正则匹配获取环境
@@ -76,7 +73,7 @@ def get_env_prop(path: str, default=None):
             prop = _dfs_travel_path(item, [env, ] + path.split('.'))
         if not prop:
             prop = _dfs_travel_path(item, path.split('.'))
-        print('get_env_prop %s  %s -> %s' % (env, path, prop))
+        # print('get_env_prop %s  %s -> %s' % (env, path, prop))
         if prop is None:
             if default is None:
                 raise ValueError('prop=%s not found' % path)

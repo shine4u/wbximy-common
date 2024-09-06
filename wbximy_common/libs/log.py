@@ -33,7 +33,7 @@ def setup_logger(
         app_name='main',  # 应用名称
         backup_count=3,  # 备份数
         rotate_mode=None,  # 按X备份 H D
-        process_safe=False,
+        process_safe=False,  # similar as thread_safe 是否进程安全
         debug=False,
 ):
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
