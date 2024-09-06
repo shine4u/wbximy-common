@@ -17,18 +17,12 @@ PKType = TypeVar('PKType', int, str, datetime, date)
 
 
 # MySQLDao：对应一张具体的物理表
-class MySQLDao(object):
-    def __init__(
-            self,
-            db_tb_name: str,
-            batch_size: int = 2000,
-            entity_class: Type[EntityType] = None,
-            **kwargs,
-    ):
+class MySQLDao(MySQLClient):
+    def __init__(self, db_tb_name: str, batch_size: int = 2000, entity_class: Type[EntityType] = None, **kwargs):
         self.db_tb_name: str = db_tb_name  # 指定库表名称
         self.batch_size: int = batch_size  # 批量读取数据的大小
         self.entity_class: Type[EntityType] = entity_class or dict  # 实体类
-        self.mysql_client = MySQLClient(**kwargs)
+        super().__init__(**kwargs)
 
     def _to_entity(self, d: Optional[Dict]) -> Optional[EntityType]:
         if d is None:
@@ -40,7 +34,7 @@ class MySQLDao(object):
     def get(self, **kwargs) -> Optional[EntityType]:
         sql_where = ('where ' if kwargs else ' ') + ' and '.join(f'{k}=%({k})s' for k in kwargs.keys())
         sql = f'select * from {self.db_tb_name} {sql_where} limit 1'
-        d = self.mysql_client.select(sql, args=kwargs)
+        d = self.select(sql, args=kwargs)
         return self._to_entity(d)
 
     def get_by_id(self, _id: PKType):
@@ -51,14 +45,14 @@ class MySQLDao(object):
         limit = limit or self.batch_size
         sql_where = ' and '.join(f'{k} {"is" if v is None else "="} %({k})s' for k, v in kwargs.items())
         sql = f'select * from {self.db_tb_name} where {sql_where} limit %(limit)s'
-        for d in self.mysql_client.select_many(sql, args=kwargs | {'limit': limit}):
+        for d in self.select_many(sql, args=kwargs | {'limit': limit}):
             item = self._to_entity(d)
             if item is not None:
                 yield item
 
     def get_max_id(self) -> PKType:
         sql = f'select max(id) from {self.db_tb_name}'
-        d = self.mysql_client.select(sql)
+        d = self.select(sql)
         return d['max(id)']
 
     def table_exists(self) -> bool:
@@ -78,7 +72,7 @@ class MySQLDao(object):
         sql_sets = ', '.join(f'{k}=%({k})s' for k in d)
         if not oid:
             sql = f'insert ignore {self.db_tb_name} set {sql_sets}'
-            oid = self.mysql_client.insert(sql, args=d)
+            oid = self.insert(sql, args=d)
             if isinstance(o, BaseEntity):
                 o.id = oid
             else:
@@ -87,7 +81,7 @@ class MySQLDao(object):
         else:
             sql = f'update {self.db_tb_name} set {sql_sets} where id=%(id)s limit 1'
             try:
-                changed = self.mysql_client.execute(sql, args=d | {'id': oid})
+                changed = self.execute(sql, args=d | {'id': oid})
             except pymysql.err.IntegrityError:
                 return False
             if changed > 1:
@@ -101,7 +95,7 @@ class MySQLDao(object):
     def scan_iter(self, offset: PKType, scan_key: str, count: int) -> Tuple[PKType, List[EntityType]]:
         sql = f'select * from {self.db_tb_name} where {scan_key} > %s limit %s'
         next_offset, items = offset, []
-        for did, d in enumerate(self.mysql_client.select_many(sql=sql, args=(offset, int(count*1.2)))):
+        for did, d in enumerate(self.select_many(sql=sql, args=(offset, int(count*1.2)))):
             if did >= count and d[scan_key] != next_offset:
                 break
             next_offset = d[scan_key]

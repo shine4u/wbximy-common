@@ -9,6 +9,7 @@ import yaml
 from functools import lru_cache
 from typing import Optional, List
 
+
 # 获取当前设备的网卡IP，这里假设机器只有一个IP
 # https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
 @lru_cache(None)

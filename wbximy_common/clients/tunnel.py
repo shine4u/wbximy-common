@@ -39,7 +39,7 @@ class TunnelMixin(object):
     def _use_tunnel(self, ) -> bool:
         if self.host is None or self.port is None:
             return False
-        if self.host in ['localhost', '127.0.0.1']:
+        if self.host in ['localhost', '127.0.0.1', '82.156.19.64']:
             return False
         if self.tunnel is not None:
             return self.tunnel

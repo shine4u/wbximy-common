@@ -71,7 +71,3 @@ def to_datetime(o) -> Optional[datetime]:
             return datetime.strptime(o, '%Y-%m-%dT%H:%M:%S.%f')
     logger.info('bad datetime %s [%s], return None', type(o), o)
     return None
-
-
-def cur_ts_sec() -> int:
-    return int(time.time())
