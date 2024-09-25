@@ -8,11 +8,9 @@ logger = logging.getLogger(__name__)
 
 
 # https://gist.github.com/frankcleary/f97fe244ef54cd75278e521ea52a697a
+# BoundedExecutor behaves as a ThreadPoolExecutor which will block on
+# calls to submit() once the limit given as "bound" (max_workers*cache_factor) work items are queued for execution.
 class BoundedExecutor(ThreadPoolExecutor):
-    """BoundedExecutor behaves as a ThreadPoolExecutor which will block on
-    calls to submit() once the limit given as "bound" (max_workers*cache_factor) work items are queued for
-    execution.
-    """
     def __init__(self, max_workers: int = 1, cache_factor: int = 8, **kwargs):
         self.semaphore = BoundedSemaphore(max_workers * cache_factor)
         super().__init__(max_workers=max_workers, **kwargs)

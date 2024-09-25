@@ -26,7 +26,7 @@ def get_my_ip() -> Optional[str]:
             continue
         if ip != '127.0.0.1':
             break
-    print(f'get_ip: {ip}')
+    print(f'get_ip >> {ip}')
     return ip
 
 
@@ -56,13 +56,12 @@ def get_env() -> Optional[str]:
         item = yaml.safe_load(f)
         for pat, env in item.get('env', {}).items():
             if re.fullmatch(pat, my_ip):
-                print(f'get_env: {env}')
+                print(f'get_env >> {env}')
                 return env
     return None
 
 
 # 获取配置值 根据ip正则匹配获取环境
-# real_path需要包含path，且优先选取env对比的上的real_path
 @lru_cache(None)
 def get_env_prop(path: str, default=None):
     env = get_env()
@@ -147,3 +146,17 @@ def get_stack_info():
     s = ''.join(traceback.format_stack()[:-1] + traceback.format_exception(*sys.exc_info())[1:])
     # s = s.replace('\n', '').replace('\r', ' ')
     return s
+
+
+def main():
+    for prop_paths in [
+        'a.b.p_int',
+        'a.b.p_str',
+        'a.b.p_int_env',
+    ]:
+        prop = get_env_prop(prop_paths)
+        print(f'{prop_paths} --> {prop} {type(prop)}')
+
+
+if __name__ == '__main__':
+    main()
