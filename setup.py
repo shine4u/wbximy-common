@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='wbximy_common',
-    version='0.0.1',
+    version='0.0.2',
     description='common tools wbximy.',
     author='WangBangXu',
     author_email='shine19890705@gmail.com',
