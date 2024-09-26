@@ -4,18 +4,18 @@ import logging
 import time
 from typing import Type, Dict, TypeVar, Optional, Generator, List, Tuple
 from datetime import date, datetime
-
 import pymysql.err
 from pymysql import ProgrammingError
 from wbximy_common.clients.mysql_client import MySQLClient
-from wbximy_common.dao.base_entity import BaseEntity
+from wbximy_common.common.model import CustomBaseModel
 
 logger = logging.getLogger(__name__)
 
-EntityType = TypeVar('EntityType', BaseEntity, Dict)
+EntityType = TypeVar('EntityType', CustomBaseModel, Dict)
 PKType = TypeVar('PKType', int, str, datetime, date)
 
 
+# last update at 2024-09-26
 # MySQLDao：对应一张具体的物理表
 class MySQLDao(MySQLClient):
     def __init__(self, db_tb_name: str, batch_size: int = 2000, entity_class: Type[EntityType] = None, **kwargs):
@@ -62,9 +62,9 @@ class MySQLDao(MySQLClient):
             return False
         return True
 
-    # 如果设置id，则按照id进行update， 如果未设置id，则进行insert ignore逻辑，返回是否变更
+    # 如果设置id，则按照id进行update，如果未设置id，则进行insert ignore逻辑，返回是否变更
     def save_by_id(self, o: EntityType, ignore_create_update_time=True) -> bool:
-        d = o.to_dict() if isinstance(o, BaseEntity) else o
+        d = o.to_dict() if isinstance(o, CustomBaseModel) else o
         oid = d.pop('id')
         if ignore_create_update_time:
             d.pop('create_time', '')
@@ -73,7 +73,7 @@ class MySQLDao(MySQLClient):
         if not oid:
             sql = f'insert ignore {self.db_tb_name} set {sql_sets}'
             oid = self.insert(sql, args=d)
-            if isinstance(o, BaseEntity):
+            if isinstance(o, CustomBaseModel):
                 o.id = oid
             else:
                 o['id'] = oid
@@ -84,12 +84,12 @@ class MySQLDao(MySQLClient):
                 changed = self.execute(sql, args=d | {'id': oid})
             except pymysql.err.IntegrityError:
                 return False
-            if changed > 1:
-                logger.warning(f'changed={changed} > 1, error o={o.to_json()}')
+            # if changed > 1:
+            #     logger.warning(f'changed={changed} > 1, error o={o.to_json()}')
             return changed == 1
 
-    def save_by_group(self):
-        pass
+    # def save_by_group(self):
+    #     pass
 
     # 不包括offset位置，选取「大约」count条数据， 大约：用于保证next_offset值的数据scan完整
     def scan_iter(self, offset: PKType, scan_key: str, count: int) -> Tuple[PKType, List[EntityType]]:

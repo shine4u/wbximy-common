@@ -9,7 +9,8 @@ from wbximy_common.libs.env import get_env_prop, get_env, get_proj_dir
 logger = logging.getLogger(__name__)
 
 
-# 可以通过隧道连接的Client， 隧道基于SSHTunnelForwarder
+# 可以通过隧道连接的Client， 隧道基于sshtunnel.SSHTunnelForwarder
+# 需要配置跳板机 clients.tunnel.host 和 clients.tunnel.host 鉴权使用 get_proj_dir() + '/' + 'work.pem'
 class TunnelMixin(object):
     tunnel_cache: Dict[Tuple[str, int], int] = dict()
     tunnel_cache_lock = Lock()
@@ -26,8 +27,8 @@ class TunnelMixin(object):
                     self.host, self.port = 'localhost', self.tunnel_cache[(self.host, self.port)]
                     return
                 self._tunnel_server = SSHTunnelForwarder(
-                    ssh_address_or_host=(get_env_prop('tunnel_hw.host'), 22),
-                    ssh_username=get_env_prop('tunnel_hw.user'),
+                    ssh_address_or_host=(get_env_prop('clients.tunnel.host'), 22),
+                    ssh_username=get_env_prop('clients.tunnel.user'),
                     ssh_pkey=get_proj_dir() + '/' + 'work.pem',
                     remote_bind_address=(self.host, self.port)
                 )
